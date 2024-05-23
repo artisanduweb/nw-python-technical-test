@@ -11,8 +11,9 @@ class Site(Base):
   max_power_megawatt = Column(Float)
   min_power_megawatt = Column(Float)
   useful_energy_at_1_megawatt = Column(Float)
-  efficiency = Column(Float)
-  country = Column(String)
+  # Todo: Add later
+  #efficiency = Column(Float)
+  #country = Column(String)
 
   groups = relationship('Group', secondary='site_group', back_populates='sites')
   

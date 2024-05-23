@@ -14,16 +14,16 @@ restart:
 	docker compose restart
 
 sh:
-	docker exec -it technical-test-api sh
+	docker exec -it nw-technical-test-api sh
 
 migrations:
-	docker exec -it technical-test-api alembic revision --autogenerate -m "$(msg)"
+	docker exec -it nw-technical-test-api alembic revision --autogenerate -m "$(msg)"
 
 migrate:
-	docker exec -it technical-test-api alembic upgrade head
+	docker exec -it nw-technical-test-api alembic upgrade head
 
 downgrade:
-	docker exec -it technical-test-api alembic downgrade -1
+	docker exec -it nw-technical-test-api alembic downgrade -1
 
 fmt:
 	poetry run black . && isort .
