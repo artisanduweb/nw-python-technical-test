@@ -25,6 +25,8 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - .env
+    ports:
+      - 5434:5432
     healthcheck:
       test:
         [
