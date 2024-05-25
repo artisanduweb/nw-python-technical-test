@@ -1,3 +1,5 @@
-from fastapi import FastAPI
+from routes import app
 
-app = FastAPI(title="Python technical test")
+if __name__ == "__main__":
+  app.run()
+  
