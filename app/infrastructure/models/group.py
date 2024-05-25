@@ -11,11 +11,9 @@ class GroupType(str, Enum):
 
 class Group(Base):
   __tablename__ = "groups"
-
   id = Column(Integer, primary_key=True, index=True)
-  name = Column(String, unique=True, index=True)
+  name = Column(String, unique=True, index=True, nullable=False)
   type = Column(SQLAlchemyEnum(GroupType), nullable=False)
   parent_group_id = Column(Integer, ForeignKey('groups.id'), nullable=True)
-
   sites = relationship('Site', secondary='site_group', back_populates='groups')
-  subgroups = relationship('Group', backref='parent_group', remote_side=[id], cascade='all, delete-orphan')
+  subgroups = relationship('Group', backref='parent_group', remote_side=[id], cascade='all, delete-orphan', single_parent=True)
