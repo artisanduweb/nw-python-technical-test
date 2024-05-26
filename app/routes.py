@@ -58,7 +58,7 @@ async def update_group(group_id: int, group: schemas.GroupUpdate, db: AsyncSessi
   result = await db.execute(query)
   existing_group = result.scalar()
   if existing_group is None:
-    raise HTTPException(status=status.HTTP_404_NOT_FOUND, detail="Groupe non trouvé")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Groupe non trouvé")
   
   for var, value in group.dict(exclude_unset=True).items():
     setattr(existing_group, var, value)
@@ -74,7 +74,7 @@ async def delete_site(site_id: int, db: AsyncSession = Depends(get_session)):
   result = await db.execute(query)
   site = result.scalar()
   if site is None:
-    raise HTTPException(status=status.HTTP_404_NOT_FOUND, detail="Site non trouvé")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site non trouvé")
   await db.delete(site)
   await db.commit()
   return { "ok": True }
@@ -85,7 +85,7 @@ async def delete_group(group_id: int, db: AsyncSession=Depends(get_session)):
   result = await db.execute(query)
   group = result.scalar()
   if group is None:
-    raise HTTPException(status=status.HTTP_404_NOT_FOUND, detail="Group not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
   await db.delete(group)
   await db.commit() 
   return { "ok": True}
