@@ -15,5 +15,5 @@ class Group(Base):
   name = Column(String, unique=True, index=True, nullable=False)
   type = Column(SQLAlchemyEnum(GroupType), nullable=False)
   parent_group_id = Column(Integer, ForeignKey('groups.id'), nullable=True)
-  sites = relationship('Site', secondary='site_group', back_populates='groups')
-  subgroups = relationship('Group', backref='parent_group', remote_side=[id], cascade='all, delete-orphan', single_parent=True)
+  sites = relationship('Site', secondary='site_group', back_populates='groups',lazy="selectin")
+  subgroups = relationship('Group', backref='parent_group', remote_side=[id], cascade='all, delete-orphan', single_parent=True, lazy='selectin')
