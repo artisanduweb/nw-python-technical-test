@@ -1,6 +1,8 @@
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import date
+from enum import Enum
+
 
 class SiteBase(BaseModel):
   name: str
@@ -20,10 +22,14 @@ class Site(SiteBase):
   class Config:
     orm_mode = True
 
+class GroupType(str, Enum):
+    group1 = 'group1'
+    group2 = 'group2'
+    group3 = 'group3'
 
 class GroupBase(BaseModel):
   name: str
-  type: str
+  type: GroupType
 
 class GroupCreate(GroupBase):
   pass
