@@ -20,7 +20,7 @@ async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_
   if not site_model:
       raise HTTPException(status_code=400, detail="Invalid site type specified.")
 
-  new_site = Site(**site.dict(exclude={'variant'}))
+  new_site = site_model(**site.dict(exclude={'variant'}))
   db.add(new_site)
   await db.commit()
   await db.refresh(new_site)
