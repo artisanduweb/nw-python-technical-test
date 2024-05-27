@@ -29,7 +29,7 @@ async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_
   model_classes = {
     'basic_site': Site,
     'italian_site': ItalianSite,
-    'french_site': Site,
+    'french_site': FrenchSite,
   }
 
   site_model = model_classes.get(site.variant)
