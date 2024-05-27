@@ -12,6 +12,7 @@ class SiteBase(BaseModel):
 
 
 class SiteCreate(SiteBase):
+  variant: str
   useful_energy_at_1_megawatt: Optional[float] = None
 
 class SiteUpdate(SiteBase):
@@ -19,6 +20,7 @@ class SiteUpdate(SiteBase):
 
 class Site(SiteBase):
   id: int
+  variant: str
   class Config:
     orm_mode = True
 
