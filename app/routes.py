@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import FastAPI, HTTPException, status, Depends
-from infrastructure.models import Site, Group
+from infrastructure.models import Site, Group, ItalianSite
 from infrastructure.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -10,9 +10,20 @@ app = FastAPI(title="NW Python technical test")
 
 @app.post('/sites', response_model=schemas.Site)
 async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_session)):
-  new_site = Site(**site.dict())
+  model_classes = {
+    'basic_site': Site,
+    'italian_site': ItalianSite,
+    'french_site': Site,
+  }
+
+  site_model = model_classes.get(site.variant)
+  if not site_model:
+      raise HTTPException(status_code=400, detail="Invalid site type specified.")
+
+  new_site = Site(**site.dict(exclude={'variant'}))
   db.add(new_site)
   await db.commit()
+  await db.refresh(new_site)
   return new_site
 
 @app.post('/groups', response_model=schemas.Group)

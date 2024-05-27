@@ -11,4 +11,11 @@ class Site(Base):
   min_power_megawatt = Column(Float)
   useful_energy_at_1_megawatt = Column(Float)
   groups = relationship('Group', secondary='site_group', back_populates='sites')
+  
+  # kind/type of the site
+  variant = Column(String, index=True, default='basic_site')
+  __mapper_args__ = {
+    'polymorphic_on': variant,
+    'polymorphic_identity': 'basic_site' # Default identifier
+  }
 
