@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 from enum import Enum
 
@@ -14,6 +14,7 @@ class SiteBase(BaseModel):
 class SiteCreate(SiteBase):
   variant: str
   useful_energy_at_1_megawatt: Optional[float] = None
+  group_ids: List[int] = Field(default_factory=list)
 
 class SiteUpdate(SiteBase):
   pass

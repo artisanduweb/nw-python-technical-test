@@ -10,7 +10,7 @@ class Site(Base):
   max_power_megawatt = Column(Float)
   min_power_megawatt = Column(Float)
   useful_energy_at_1_megawatt = Column(Float)
-  groups = relationship('Group', secondary='site_group', back_populates='sites')
+  groups = relationship('Group', secondary='site_group', back_populates='sites', lazy='selectin')
   
   # kind/type of the site
   variant = Column(String, index=True, default='basic_site')
