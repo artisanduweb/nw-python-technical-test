@@ -1,12 +1,28 @@
 from typing import List
+from datetime import date
 from fastapi import FastAPI, HTTPException, status, Depends
-from infrastructure.models import Site, Group, ItalianSite
-from infrastructure.db import get_session
+from infrastructure.models import Site, Group, ItalianSite, FrenchSite
+from infrastructure.db import get_session, get_context_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func, and_
+from sqlalchemy.orm import selectinload
 import schemas
 
 app = FastAPI(title="NW Python technical test")
+
+async def can_install_french_site(installation_date: date, db: AsyncSession):
+  count = await db.scalar(select(func.count()).where(and_(Site.variant == "french_site", Site.installation_date == installation_date)))
+  return count == 0
+
+def is_weekend(date: date):
+  return date.weekday() in [5, 6]
+
+async def check_group_types(db: AsyncSession, group_ids: List[int], group_type: str) -> bool:
+  count = await db.scalar(
+    select(func.count(Group.id)).where(and_(Group.id.in_(group_ids), Group.type == group_type))
+  )
+  return count == 0
 
 @app.post('/sites', response_model=schemas.Site)
 async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_session)):
@@ -20,10 +36,30 @@ async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_
   if not site_model:
       raise HTTPException(status_code=400, detail="Invalid site type specified.")
 
-  new_site = site_model(**site.dict(exclude={'variant'}))
+  if site.variant == 'french_site' and not await can_install_french_site(site.installation_date, db):
+    raise HTTPException(status_code=400, detail="Only one French site can be installed per day.")
+
+  if site.variant == 'italian_site' and not is_weekend(site.installation_date):
+    raise HTTPException(status_code=400, detail="Italian sites must be installed on weekends.")
+  
+
+  if site.group_ids:
+    if not await check_group_types(db, site.group_ids, 'group3'):
+      raise HTTPException(status_code=400, detail="No site can be associated with `group.type == 'group3'`.")
+    groups = await db.execute(select(Group).where(Group.id.in_(site.group_ids)).options(selectinload(Group.sites)))
+    groups = list(groups)
+    
+  new_site = site_model(**site.dict(exclude={'variant', 'group_ids'}))
   db.add(new_site)
   await db.commit()
   await db.refresh(new_site)
+
+  # Add groups to the site
+  if site.group_ids:
+    new_site.groups = groups
+    await db.commit()
+    await db.refresh(new_site)
+  
   return new_site
 
 @app.post('/groups', response_model=schemas.Group)
