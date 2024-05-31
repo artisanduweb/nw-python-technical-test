@@ -2,7 +2,7 @@ from typing import List
 from datetime import date
 from fastapi import FastAPI, HTTPException, status, Depends
 from infrastructure.models import Site, Group, ItalianSite, FrenchSite
-from infrastructure.db import get_session, get_context_session
+from infrastructure.db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, and_
@@ -25,7 +25,7 @@ async def check_group_types(db: AsyncSession, group_ids: List[int], group_type: 
   return count == 0
 
 @app.post('/sites', response_model=schemas.Site)
-async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_session)):
+async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_db)):
   model_classes = {
     'basic_site': Site,
     'italian_site': ItalianSite,
@@ -63,7 +63,7 @@ async def create_sites(site: schemas.SiteCreate, db: AsyncSession = Depends(get_
   return new_site
 
 @app.post('/groups', response_model=schemas.Group)
-async def create_groups(group: schemas.GroupCreate, db: AsyncSession=Depends(get_session)):
+async def create_groups(group: schemas.GroupCreate, db: AsyncSession=Depends(get_db)):
   new_group = Group(**group.dict())
   db.add(new_group)
   await db.commit()
@@ -71,21 +71,21 @@ async def create_groups(group: schemas.GroupCreate, db: AsyncSession=Depends(get
   return new_group
 
 @app.get('/sites', response_model=List[schemas.Site])
-async def list_sites(skip: int= 0, limit: int=100,  db: AsyncSession =Depends(get_session)):
+async def list_sites(skip: int= 0, limit: int=100,  db: AsyncSession =Depends(get_db)):
   result = await db.execute(select(Site).offset(skip).limit(limit))
   sites = result.scalars().all()
   return sites
 
 
 @app.get('/groups', response_model=List[schemas.Group])
-async def list_groups(skip: int= 0, limit: int=100, db: AsyncSession = Depends(get_session)):
+async def list_groups(skip: int= 0, limit: int=100, db: AsyncSession = Depends(get_db)):
   result = await db.execute(select(Group).offset(skip).limit(limit))
   groups = result.scalars().all()
   return groups
 
 
 @app.patch("/sites/{site_id}", response_model=schemas.Site)
-async def update_site(site_id: int, site: schemas.SiteUpdate, db: AsyncSession=Depends(get_session)):
+async def update_site(site_id: int, site: schemas.SiteUpdate, db: AsyncSession=Depends(get_db)):
   query = select(Site).filter_by(id=site_id) 
   result = await db.execute(query)
   existing_site = result.scalar()
@@ -100,7 +100,7 @@ async def update_site(site_id: int, site: schemas.SiteUpdate, db: AsyncSession=D
   return existing_site
 
 @app.patch("/groups/{group_id}", response_model=schemas.Group)
-async def update_group(group_id: int, group: schemas.GroupUpdate, db: AsyncSession=Depends(get_session)):
+async def update_group(group_id: int, group: schemas.GroupUpdate, db: AsyncSession=Depends(get_db)):
   query = select(Group).filter_by(id=group_id)
   result = await db.execute(query)
   existing_group = result.scalar()
@@ -116,7 +116,7 @@ async def update_group(group_id: int, group: schemas.GroupUpdate, db: AsyncSessi
 
 
 @app.delete("/sites/{site_id}")
-async def delete_site(site_id: int, db: AsyncSession = Depends(get_session)):
+async def delete_site(site_id: int, db: AsyncSession = Depends(get_db)):
   query = select(Site).filter_by(id=site_id)
   result = await db.execute(query)
   site = result.scalar()
@@ -127,7 +127,7 @@ async def delete_site(site_id: int, db: AsyncSession = Depends(get_session)):
   return { "ok": True }
 
 @app.delete("/groups/{group_id}")
-async def delete_group(group_id: int, db: AsyncSession=Depends(get_session)):
+async def delete_group(group_id: int, db: AsyncSession=Depends(get_db)):
   query = select(Group).filter_by(id=group_id)
   result = await db.execute(query)
   group = result.scalar()
