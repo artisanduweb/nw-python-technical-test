@@ -7,6 +7,10 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     db_url: PostgresDsn
     db_test_url: PostgresDsn
+    pythonpath: str = "app"
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
 
     class Config:
         env_file = ".env"
